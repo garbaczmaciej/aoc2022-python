@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 from sys import argv
 
-
-
 import numpy as np
 
 
@@ -51,8 +49,9 @@ class Board:
                     visited[y_new][x_new] = 1
                     queue.append((x_new, y_new))
                     _from[(x_new, y_new)] = current            
+        else:
+            return []
         
-        current = self.end_cord
         path = list()
         while current != self.start_cord:
             path.append(current)
@@ -80,6 +79,35 @@ class Board:
     def can_go(self, visited: np.array, x: int, y: int) -> bool:
         if is_visited(visited, x, y):
             return False
+
+    def get_starting_points(self) -> list:
+
+        starting_points = list()
+
+        height, width = self.board.shape
+
+        for y in  range(height):
+            for x in range(width):
+                if self.board[y][x] == "a" and self.has_surroundings(x, y):
+                    starting_points.append((x, y))
+
+        return starting_points
+
+
+    def has_surroundings(self, x: int, y: int) -> bool:
+
+        height, width = self.board.shape
+
+        for x_diff, y_diff in self.DIRECTIONS:
+            x_new = x + x_diff
+            y_new = y + y_diff
+            if x_new < 0 or y_new < 0 or x_new >= width or y_new >= height:
+                continue
+
+            if self.board[y_new][x_new] != 'a':
+                return True
+
+        return False
 
         
 
@@ -117,11 +145,26 @@ def part1(_in: str) -> None:
     board = Board(_in)
 
     path = board.find_path()
-    print(len(path))
+    print("PART 1:", len(path))
 
 
 def part2(_in: str) -> None:
-    pass
+    board = Board(_in)
+    starting_points = board.get_starting_points()
+    starting_points.append(board.start_cord)
+
+    print(f"EXAMINING {len(starting_points)} PATHS")
+
+    path_lengths = list()
+    for i, starting_point in enumerate(starting_points):
+        board.start_cord = starting_point
+        path = board.find_path()
+        if path:
+            path_lengths.append(len(path))
+        print("EXAMINED:", i)
+
+    min_path = min(path_lengths)
+    print("PART 2:", min_path)
 
 
 def main() -> None:
