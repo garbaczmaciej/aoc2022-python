@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from sys import argv
 
+from copy import deepcopy
+
 import numpy as np
 
 
@@ -21,7 +23,7 @@ class SandBoard:
 
     def __str__(self) -> str:
     
-        # content = self.content[:, 495:504]
+        content = self.content[:, 495:504]
         height, width = content.shape
         lines = list()
         for y in range(height):
@@ -115,6 +117,18 @@ class SandBoard:
         return (max(x_cords), max(y_cords))
 
 
+class AdvancedSandBoard(SandBoard):
+
+    def __init__(self, lines: list):
+        x_max, y_max = self.find_max(lines)
+        lines.append(f"0,{y_max} -> {x_max},{y_max}")
+        super().__init__(lines)
+
+    def find_max(self,lines: list) -> tuple[int, int]:
+        x_max, y_max = super().find_max(lines)
+        return x_max*2, y_max+2
+
+
 def get_input(filename: str) -> list:
     with open(filename, "r") as f:
         _in = [line for line in f.read().split("\n") if line.split()]
@@ -123,15 +137,24 @@ def get_input(filename: str) -> list:
 
 
 def part1(_in: list) -> None:
+    _in = deepcopy(_in)
     board = SandBoard(_in)
     i = 0
     while board.drop_sand():
         i += 1
+        # print(board)
+        # print(i)
 
-    print(i)
+    print("PART 1:", i)
 
 def part2(_in: list) -> None:
-    pass
+    _in = deepcopy(_in)
+    board = AdvancedSandBoard(_in)
+    i = 0
+    while board.content[0][500] != 2:
+        board.drop_sand()
+        i += 1
+    print("PART 2:", i)
 
 
 def main() -> None:
