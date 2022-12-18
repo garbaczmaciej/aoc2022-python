@@ -34,13 +34,9 @@ class Monkey:
         return int(eval(self.operation) / 3)
 
     def inspect(self, old: int) -> tuple[int, int]:
-        print("CALCULATING")
         new = self.get_worry_level(old)
-        print("FINISHED CALCULATING")
 
-        print("TESTING")
         new_monkey = self.test(new)
-        print("FINISHED TESTING")
 
         self._inspect_count += 1
 
@@ -48,8 +44,10 @@ class Monkey:
 
 
 class AdvancedMonkey(Monkey):
-    def __init__(self, monkey_str: str):
+    def __init__(self, monkey_str: str, supermodulo: int):
         super().__init__(monkey_str)
+        
+        self.supermodulo = supermodulo
         
         self.operation_optimized = self.get_optimized_operation()
 
@@ -69,7 +67,7 @@ class AdvancedMonkey(Monkey):
 
     def get_worry_level(self, old:int):
         new = self.operation_optimized(old)
-        return int((new*old)/gcd(new, old))
+        return new % self.supermodulo
 
 
 def get_input(filename: str) -> list:
@@ -94,7 +92,12 @@ def part1(_in: list) -> None:
 
 def part2(_in: list) -> None:
 
-    monkeys = [AdvancedMonkey(monkey._monkey_str) for monkey in _in]
+    divisors = [monkey._divider for monkey in _in]
+    supermodulo = 1 
+    for divisor in divisors:
+        supermodulo *= divisor
+
+    monkeys = [AdvancedMonkey(monkey._monkey_str, supermodulo) for monkey in _in]
 
     for round_number in range(10000):
         for monkey in monkeys:
@@ -102,11 +105,10 @@ def part2(_in: list) -> None:
                 new_item, new_monkey = monkey.inspect(item)
                 monkeys[new_monkey].items.append(new_item)
             monkey.items = []
-        print(round_number)
 
     monkeys.sort(key=lambda monkey: monkey.inspect_count)
     monkey_business_level = monkeys[-1].inspect_count * monkeys[-2].inspect_count
-    print(monkey_business_level)
+    print("PART 2:", monkey_business_level)
 
 
 def main() -> None:
